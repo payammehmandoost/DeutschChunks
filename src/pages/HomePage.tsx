@@ -177,7 +177,7 @@ export default function HomePage({ settings }: Props) {
       {/* Lessons Overview */}
       <div className="mb-6">
         <h2 className="font-semibold text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
-          A1 Lessons
+          A1 Lessons ({lessons.length} lessons · {phrases.length} phrases)
         </h2>
         <div className="grid grid-cols-1 gap-2">
           {lessons.map(lesson => {
