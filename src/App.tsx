@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Component, type ReactNode } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { getSettings, saveSettings, UserSettings } from './services/storageService';
+import { useAuth } from './hooks/useAuth';
 import HomePage from './pages/HomePage';
 import LearnPage from './pages/LearnPage';
 import PracticePage from './pages/PracticePage';
@@ -9,6 +10,8 @@ import FavoritesPage from './pages/FavoritesPage';
 import SettingsPage from './pages/SettingsPage';
 import SearchPage from './pages/SearchPage';
 import PhraseDetailPage from './pages/PhraseDetailPage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
 import BottomNav from './components/BottomNav';
 
 // Error Boundary
@@ -50,6 +53,8 @@ class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boole
 }
 
 function AppContent() {
+  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [settings, setSettings] = useState<UserSettings>({
     theme: 'system',
     language: 'en',
@@ -95,7 +100,8 @@ function AppContent() {
     setSettings(prev => ({ ...prev, ...partial }));
   };
 
-  if (!settingsLoaded) {
+  // Loading state
+  if (authLoading || !settingsLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
         <div className="text-center animate-pulse">
@@ -103,6 +109,20 @@ function AppContent() {
           <p className="text-sm font-medium" style={{ color: 'var(--text-muted)' }}>Loading...</p>
         </div>
       </div>
+    );
+  }
+
+  // Not authenticated - show login/register
+  if (!isAuthenticated) {
+    return (
+      <Routes>
+        <Route path="/register" element={
+          <RegisterPage onSwitchToLogin={() => setAuthMode('login')} />
+        } />
+        <Route path="*" element={
+          <LoginPage onSwitchToRegister={() => setAuthMode('register')} />
+        } />
+      </Routes>
     );
   }
 
