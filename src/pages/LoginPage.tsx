@@ -20,7 +20,10 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
     try {
       await signInWithEmail(email, password);
     } catch (err: any) {
-      setError(getErrorMessage(err.code));
+      const errorCode = err.code || err?.errorInfo?.code || '';
+      const errorMessage = err.message || '';
+      console.error('Login error:', err);
+      setError(getErrorMessage(errorCode, errorMessage));
     } finally {
       setLoading(false);
     }
@@ -33,7 +36,10 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
     try {
       await signInWithGoogle();
     } catch (err: any) {
-      setError(getErrorMessage(err.code));
+      const errorCode = err.code || err?.errorInfo?.code || '';
+      const errorMessage = err.message || '';
+      console.error('Google login error:', err);
+      setError(getErrorMessage(errorCode, errorMessage));
     } finally {
       setLoading(false);
     }
@@ -163,21 +169,38 @@ export default function LoginPage({ onSwitchToRegister }: Props) {
   );
 }
 
-function getErrorMessage(code: string): string {
+function getErrorMessage(code: string, message?: string): string {
+  console.error('Firebase Auth Error:', { code, message });
+  
   switch (code) {
     case 'auth/invalid-email':
-      return 'Invalid email address';
+      return 'آدرس ایمیل نامعتبر است';
     case 'auth/user-not-found':
-      return 'No account found with this email';
+      return 'حسابی با این ایمیل پیدا نشد';
     case 'auth/wrong-password':
-      return 'Incorrect password';
+      return 'رمز عبور اشتباه است';
     case 'auth/invalid-credential':
-      return 'Invalid email or password';
+      return 'ایمیل یا رمز عبور اشتباه است';
     case 'auth/too-many-requests':
-      return 'Too many attempts. Please try again later';
+      return 'تعداد درخواست‌ها زیاد شد. لطفاً بعداً تلاش کنید';
     case 'auth/popup-closed-by-user':
-      return 'Sign in was cancelled';
+      return 'ورود لغو شد';
+    case 'auth/api-key-not-valid.-please-pass-a-valid-api-key.':
+    case 'auth/invalid-api-key':
+      return '❌ پیکربندی Firebase اشتباه است. فایل .env.local را بررسی کنید';
+    case 'auth/configuration-not-found':
+      return '❌ Firebase پیکربندی نشده. فایل .env.local را بررسی کنید';
+    case 'auth/operation-not-allowed':
+      return '❌ روش ورود فعال نشده. در Firebase Console → Authentication → Sign-in method فعال کنید';
+    case 'auth/network-request-failed':
+      return 'خطای شبکه. اتصال اینترنت را بررسی کنید';
+    case 'auth/missing-email':
+      return 'ایمیل را وارد کنید';
+    case 'auth/weak-password':
+      return 'رمز عبور باید حداقل ۶ کاراکتر باشد';
+    case 'auth/email-already-in-use':
+      return 'این ایمیل قبلاً ثبت شده';
     default:
-      return 'An error occurred. Please try again';
+      return `خطا: ${code || message || 'مشکلی پیش آمد'}`;
   }
 }
