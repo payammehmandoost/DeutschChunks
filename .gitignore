@@ -13,6 +13,7 @@ build/
 .env
 .env.local
 .env.*.local
+# IMPORTANT: Never commit Firebase credentials
 
 # Logs
 logs/
